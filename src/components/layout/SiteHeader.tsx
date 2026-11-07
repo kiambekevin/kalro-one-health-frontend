@@ -27,7 +27,7 @@ export function SiteHeader() {
             <span className="block font-display text-base font-bold text-primary-deep">
               KALRO One Health Portal
             </span>
-            <span className="block text-[11px] text-muted-foreground">Afya ya Mazao Mkononi</span>
+            <span className="block text-[11px] text-muted-foreground">Plant & Animal Health: Delivered to Every Farmer</span>
           </span>
         </a>
         <nav className="flex items-center gap-1">
