@@ -197,7 +197,7 @@ export function AIDiagnosticPage() {
     <div className="min-h-[70vh] bg-background">
       <PageIntro
         eyebrow="Plant health assistant"
-        title="AI Diagnostic"
+        title="AI Diagnostic *Test version"
         description="Add a crop image and symptom notes to search existing KALRO diagnostic records. Image recognition is not available in this deployment; results will not include an AI prediction."
       />
       <main className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px]">

@@ -6,6 +6,8 @@ const NAV = [
   { to: "/about", label: "About" },
   { to: "/search?type=crop", label: "Health profiles" },
   { to: "/pest-risk", label: "Pest Risk Map" },
+  { to: "/ipm-guides", label: "Resources" }, 
+  { to: "https://kalro.org/contact-us/", label: "Contact Us" },
 ] as const;
 
 export function SiteHeader() {
@@ -27,7 +29,7 @@ export function SiteHeader() {
             <span className="block font-display text-base font-bold text-primary-deep">
               KALRO One Health Portal
             </span>
-            <span className="block text-[11px] text-muted-foreground">Plant & Animal Health: Delivered to Every Farmer</span>
+            <span className="block text-[11px] text-muted-foreground">Plant & Animal Health: Delivering to Every Farmer</span>
           </span>
         </a>
         <nav className="flex items-center gap-1">

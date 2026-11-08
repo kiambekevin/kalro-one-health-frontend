@@ -7,6 +7,8 @@ import {
   Bug,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
   Leaf,
   Map,
@@ -21,8 +23,11 @@ import {
 } from "lucide-react";
 
 import hero from "@/assets/hero.png";
-import { apiGet, apiList, imageUrl, type ApiImage, type ValueChain } from "@/lib/api";
+import partner1 from "@/assets/images/moald.png";
+import partner2 from "@/assets/images/kalro.png";
+import partner3 from "@/assets/images/fsrp.jpg";
 
+import { apiGet, apiList, imageUrl, type ApiImage, type ValueChain } from "@/lib/api";
 
 // Custom Cow Head Icon Component (Matching Lucide 17px icon styling)
 const CowIcon = ({ className }: { className?: string }) => (
@@ -39,23 +44,22 @@ const CowIcon = ({ className }: { className?: string }) => (
     {/* Horns */}
     <path d="M4 6c-1-2-1-4 0-4s2 2 3 4" />
     <path d="M20 6c1-2 1-4 0-4s-2 2-3 4" />
-    
+
     {/* Ears */}
     <path d="M5 9c-2 0-3 2-2 3s2 1 2 0" />
     <path d="M19 9c2 0 3 2 2 3s-2 1-2 0" />
-    
+
     {/* Head Outline / Muzzle */}
     <path d="M6 5h12l2 9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3l2-9z" />
-    
+
     {/* Eyes */}
     <path d="M9 10h.01" />
     <path d="M15 10h.01" />
-    
+
     {/* Nostrils / Snout Line */}
     <path d="M10 14h4" />
   </svg>
 );
-
 
 type ValueTab = "crop" | "livestock";
 type CropValue = ValueChain & { category_detail?: { name: string } | null };
@@ -68,6 +72,13 @@ const TOOLS = [
   { icon: BellRing, title: "Early Warning", sub: "View current advisories", to: "/early-warning" },
   { icon: ClipboardList, title: "Submit Surveillance", sub: "Record a field observation", to: "/surveillance" },
   { icon: Smartphone, title: "Mobile Scouting", sub: "Capture field notes on the go", to: "/mobile-scouting" },
+];
+
+// Static partner list — adjust names and file paths to match your assets folder
+const PARTNERS = [
+  { id: 1, name: "MoALD", logo: partner1, website: "https://kilimo.go.ke/" },
+  { id: 2, name: "KALRO", logo: partner2, website: "https://www.kalro.org"  },
+  { id: 3, name: "FSRP", logo: partner3, website: "https://www.fsrp.go.ke"  },
 ];
 
 function chainImage(images?: ApiImage[]) {
@@ -305,6 +316,152 @@ function HostSelect({
   );
 }
 
+/** Auto-playing, responsive partner logo slider using static assets. */
+function PartnerSlider() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [perView, setPerView] = useState(2);
+
+  // Responsive: how many logos fit per slide
+  useEffect(() => {
+    function updatePerView() {
+      const w = window.innerWidth;
+      setPerView(w >= 1024 ? 5 : w >= 640 ? 3 : 2);
+    }
+    updatePerView();
+    window.addEventListener("resize", updatePerView);
+    return () => window.removeEventListener("resize", updatePerView);
+  }, []);
+
+  const maxIndex = Math.max(0, PARTNERS.length - perView);
+
+  // Keep index in bounds when perView changes
+  useEffect(() => {
+    setIndex((i) => Math.min(i, maxIndex));
+  }, [maxIndex]);
+
+  // Autoplay
+  useEffect(() => {
+    if (paused || PARTNERS.length <= perView) return;
+    const timer = setInterval(() => {
+      setIndex((i) => (i >= maxIndex ? 0 : i + 1));
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [paused, maxIndex, perView]);
+
+  function scrollToIndex(next: number) {
+    setIndex(Math.max(0, Math.min(next, maxIndex)));
+  }
+
+  const cardWidth = 100 / perView;
+
+  return (
+    <section className="border-t border-border bg-muted/40">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.16em] text-primary">
+              Our partners
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-primary-deep sm:text-3xl">
+              Working together for healthier farms
+            </h2>
+          </div>
+          {PARTNERS.length > perView && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollToIndex(index - 1)}
+                disabled={index === 0}
+                aria-label="Previous partners"
+                className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-muted-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToIndex(index + 1)}
+                disabled={index >= maxIndex}
+                aria-label="Next partners"
+                className="grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-muted-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div
+          className="mt-8 overflow-hidden"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocusCapture={() => setPaused(true)}
+          onBlurCapture={() => setPaused(false)}
+          aria-roledescription="carousel"
+          aria-label="Partner logos"
+        >
+          <div
+            className="flex transition-transform duration-500 ease-out"
+            style={{ transform: `translateX(-${index * cardWidth}%)` }}
+          >
+            {PARTNERS.map((partner) => {
+              const card = (
+                <div className="grid h-24 place-items-center rounded-xl border border-border bg-card px-4 transition hover:border-primary/40 hover:shadow-sm">
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    loading="lazy"
+                    className="max-h-14 w-auto max-w-full object-contain"
+                  />
+                </div>
+              );
+              return (
+                <div
+                  key={partner.id}
+                  className="shrink-0 px-2"
+                  style={{ width: `${cardWidth}%` }}
+                >
+                  {partner.website ? (
+                    <a
+                      href={partner.website}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="block"
+                      title={partner.name}
+                    >
+                      {card}
+                    </a>
+                  ) : (
+                    card
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Dots */}
+        {PARTNERS.length > perView && (
+          <div className="mt-6 flex justify-center gap-2">
+            {Array.from({ length: maxIndex + 1 }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => scrollToIndex(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                aria-current={index === i}
+                className={`h-2 rounded-full transition-all ${
+                  index === i ? "w-6 bg-primary" : "w-2 bg-border hover:bg-muted-foreground/40"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function HomePage() {
   const [tab, setTab] = useState<ValueTab>("crop");
   const [healthTab, setHealthTab] = useState<ValueTab>("crop");
@@ -402,7 +559,6 @@ export function HomePage() {
         />
         <div className="hero-overlay absolute inset-0" />
         <div className="relative mx-auto max-w-5xl px-4 py-20 text-center text-primary-foreground sm:py-28">
-          
           <h1 className="mt-4 text-4xl font-extrabold sm:text-6xl">
             Healthy <span className="text-harvest">Crops.</span> Healthy{" "}
             <span className="text-harvest">Livestock.</span>
@@ -442,7 +598,6 @@ export function HomePage() {
                   >
                     {value === "crop" ? (
                       <Wheat className="h-[17px] w-[17px]" />
-                      
                     ) : (
                       <CowIcon className="h-[17px] w-[17px]" />
                     )}
@@ -607,6 +762,8 @@ export function HomePage() {
           )}
         </div>
       </section>
+
+      <PartnerSlider />
 
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <h2 className="text-2xl font-bold text-primary-deep">Essential plant health tools</h2>
